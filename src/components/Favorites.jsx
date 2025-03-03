@@ -6,12 +6,21 @@ export default function FavoriteList() {
   const [favorites, setFavorites] = useState([]);
   const previousPricesRef = useRef({}); // 🔥 Mantiene i prezzi precedenti
 
-  const formatter = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
+  const priceFormatter = new Intl.NumberFormat("it-IT", {
+    minimumFractionDigits: 2,
     maximumFractionDigits: 5,
   });
+
+  const formatNumberWithSuffix = (num) => {
+    if (num >= 1_000_000_000_000) {
+      return (num / 1_000_000_000_000).toFixed(2).replace(".", ",") + "T";
+    } else if (num >= 1_000_000_000) {
+      return (num / 1_000_000_000).toFixed(2).replace(".", ",") + "B";
+    } else if (num >= 1_000_000) {
+      return (num / 1_000_000).toFixed(2).replace(".", ",") + "M";
+    }
+    return num.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/favorites")
@@ -147,9 +156,9 @@ export default function FavoriteList() {
                         ? "down-price"
                         : ""
                     }>
-                    {formatter.format(fav.price)}
+                    $ {priceFormatter.format(fav.price)}
                   </td>
-                  <td>{formatter.format(fav.market_cap)}</td>
+                  <td>{formatNumberWithSuffix(fav.market_cap)}</td>
                   <td className="pe-5">
                     <button
                       onClick={() => removeFromFavorites(fav)}
