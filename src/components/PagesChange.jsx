@@ -7,7 +7,6 @@ PagesChange.propTypes = {
 };
 
 export default function PagesChange({ pageNumber, onPageChange }) {
-  //   const [pageNumber, setPageNumber] = useState(1);
   const [progPageNumber, setProgPageNumber] = useState(1);
 
   function handleNextProgPageNumber() {

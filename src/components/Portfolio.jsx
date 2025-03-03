@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-
+import PortfolioStats from "./PortfolioStats";
 
 export default function Favorites() {
   const [portfolio, setPortfolio] = useState([]);
@@ -21,6 +21,7 @@ export default function Favorites() {
     const now = new Date();
     setTokenCurPrice(coin.price);
     setTransactionPrice("0");
+    setTransactionType("1");
 
     const formattedDateTime = now.toISOString().slice(0, 16); // Formatta per datetime-local
     setTransactionDate(formattedDateTime);
@@ -87,6 +88,9 @@ export default function Favorites() {
             const newMarketCap = marketData.market_data.market_cap?.usd || token.market_cap;
             const marketCapRank = marketData.market_data.market_cap_rank || token.market_cap_rank;
             const oldPrice = previousPricesRef.current[token.api_id] || token.price;
+            const priceChangeDay = marketData.market_data.price_change_24h;
+            const actualPrice = marketData.market_data.current_price.usd;
+            const yesterdayPrice = actualPrice - priceChangeDay;
 
             console.log(`📊 ${token.name} - Vecchio prezzo: ${oldPrice}, Nuovo prezzo: ${newPrice}`);
 
@@ -95,6 +99,8 @@ export default function Favorites() {
               price: newPrice,
               market_cap: newMarketCap,
               market_cap_rank: marketCapRank,
+              yesterdayPrice: yesterdayPrice,
+
             };
           } catch (error) {
             console.error(`❌ Errore nel recupero dati di mercato per ${token.name}:`, error);
@@ -205,8 +211,12 @@ export default function Favorites() {
 
 
   return (
+    <>
+      <h2 className="table-title py-5 text-center">My Portfolio</h2>
+    <PortfolioStats portfolio={portfolio}/>
     <div className="watchlist-table flex flex-col items-center">
-      <h2 className="table-title my-5">My Portfolio</h2>
+
+
       <div className="table-container">
         <table className="crypto-table border table-fixed rounded-xl">
           <thead>
@@ -225,8 +235,8 @@ export default function Favorites() {
               return (
 
                 <tr
-                  key={singlePortfolioToken.id}
-                  className="table-border-bottom text-center font-bold h-12">
+                key={singlePortfolioToken.id}
+                className="table-border-bottom text-center font-bold h-12">
                   <td>{singlePortfolioToken.market_cap_rank}</td>
                   <td className="flex items-center crypto-name">
                     <img
@@ -254,7 +264,7 @@ export default function Favorites() {
 
           {[...Array(Math.max(0, 10 - portfolio.length))].map((_, index) => (
               <tr key={`empty-${index}`} className="table-border-bottom text-center font-bold h-12">
-                <td colSpan="6" className="h-10"></td> {/* Cella vuota per occupare spazio */}
+                <td colSpan="6" className="h-10"></td> 
               </tr>
           ))}
           </tbody>
@@ -277,7 +287,7 @@ export default function Favorites() {
 
       {isTransactionOpen && (
         <div
-          id="transaction-modal"
+        id="transaction-modal"
           className="fixed inset-0 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
             <div className="flex justify-between mb-4 items-center grid-cols-3">
@@ -346,9 +356,17 @@ export default function Favorites() {
                 <input
                   type="number"
                   className="mt-1 p-2 w-full border rounded-md"
-                  value={transactionQuantity}
+                  value={parseFloat(transactionQuantity).toFixed(2)}
                   onChange={(e) => setTransactionQuantity(e.target.value)}
-                />
+                  />
+                    <p
+                  id="current-price"
+                  onClick={() =>
+                    setTransactionQuantity(selectedCoin.number_of_token_owned)
+                  }
+                  className="pointer">
+                  Max Amount({parseFloat(selectedCoin.number_of_token_owned).toFixed(2)})
+                </p>
               </div>
               <div className="mb-3">
                 <label className="block text-sm font-medium text-gray-700">
@@ -359,7 +377,7 @@ export default function Favorites() {
                   className="mt-1 p-2 w-full border rounded-md"
                   value={transactionTotal}
                   onChange={(e) => setTransactionTotal(e.target.value)}
-                />
+                  />
               </div>
               <div className="mb-3">
                 <label className="block text-sm font-medium text-gray-700">
@@ -370,7 +388,7 @@ export default function Favorites() {
                   className="mt-1 p-2 w-full border rounded-md"
                   value={transactionDate}
                   onChange={(e) => setTransactionDate(e.target.value)}
-                />
+                  />
               </div>
 
               <div className="mb-3">
@@ -380,7 +398,7 @@ export default function Favorites() {
                 <input
                   type="text"
                   className="mt-1 p-2 w-full border rounded-md"
-                />
+                  />
               </div>
 
               <div className="flex justify-end">
@@ -400,5 +418,6 @@ export default function Favorites() {
     </div>
 
     
+    </>
   );
 }

@@ -178,7 +178,7 @@ export default function FavoriteList() {
 
           {[...Array(Math.max(0, 10 - favorites.length))].map((_, index) => (
               <tr key={`empty-${index}`} className="table-border-bottom text-center font-bold h-12">
-                <td colSpan="5" className="h-10"></td> {/* Cella vuota per occupare spazio */}
+                <td colSpan="5" className="h-10"></td>
               </tr>
           ))}
           </tbody>

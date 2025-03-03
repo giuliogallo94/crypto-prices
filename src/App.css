@@ -192,3 +192,13 @@ td {
   color: white;
   cursor: pointer;
 }
+
+.portfolio-stats {
+  border: 2px solid rgb(40, 86, 157);
+  border-radius: 5px;
+  padding: 1rem
+}
+
+.portfolio-stats h4 {
+  font-weight: bold;
+}
