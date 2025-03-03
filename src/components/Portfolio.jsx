@@ -226,7 +226,7 @@ export default function Favorites() {
 
                 <tr
                   key={singlePortfolioToken.id}
-                  className="table-border-bottom text-center font-bold">
+                  className="table-border-bottom text-center font-bold h-12">
                   <td>{singlePortfolioToken.market_cap_rank}</td>
                   <td className="flex items-center crypto-name">
                     <img
@@ -237,7 +237,7 @@ export default function Favorites() {
                     <h3>{singlePortfolioToken.name}</h3>
                   </td>
                   <td>{priceFormatter.format(singlePortfolioToken.price)}</td>
-                  <td className="flex flex-col">{holdingFormatter.format(singlePortfolioToken.number_of_token_owned * singlePortfolioToken.price)} <span>{parseFloat(singlePortfolioToken.number_of_token_owned).toFixed(2)} {singlePortfolioToken.symbol.toUpperCase()}</span></td>
+                  <td>{holdingFormatter.format(singlePortfolioToken.number_of_token_owned * singlePortfolioToken.price)} <br/> <span>{parseFloat(singlePortfolioToken.number_of_token_owned).toFixed(2)} {singlePortfolioToken.symbol.toUpperCase()}</span></td>
                   <td className={
                     pnl < 0 ? "down-price" : pnl > 0 ? "up-price" : ""
                   }> {(pnl > 0 ? "+" : "") + holdingFormatter.format(pnl)}</td>
@@ -251,6 +251,12 @@ export default function Favorites() {
                 </tr>
               );
             })}
+
+          {[...Array(Math.max(0, 10 - portfolio.length))].map((_, index) => (
+              <tr key={`empty-${index}`} className="table-border-bottom text-center font-bold h-12">
+                <td colSpan="6" className="h-10"></td> {/* Cella vuota per occupare spazio */}
+              </tr>
+          ))}
           </tbody>
         </table>
 

@@ -145,7 +145,7 @@ export default function FavoriteList() {
               return (
                 <tr
                   key={fav.id}
-                  className="table-border-bottom text-center font-bold">
+                  className="table-border-bottom text-center font-bold h-12">
                   <td>{fav.market_cap_rank}</td>
                   <td className="flex items-center crypto-name">
                     <img src={fav.image} className="crypto-logo mr-5" alt="" />
@@ -175,6 +175,12 @@ export default function FavoriteList() {
                 </tr>
               );
             })}
+
+          {[...Array(Math.max(0, 10 - favorites.length))].map((_, index) => (
+              <tr key={`empty-${index}`} className="table-border-bottom text-center font-bold h-12">
+                <td colSpan="5" className="h-10"></td> {/* Cella vuota per occupare spazio */}
+              </tr>
+          ))}
           </tbody>
         </table>
       </div>
