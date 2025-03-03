@@ -11,7 +11,7 @@ import {
 
 export default function Sidebar() {
   const menu = [
-    { name: "cryptoTable", icon: faChartLine, path: "/cryptoTable" },
+    { name: "cryptoTable", icon: faChartLine, path: "/" },
     { name: "portfolio", icon: faCoins, path: "/portfolio" },
     { name: "favorites", icon: faStar, path: "/favorites" },
     { name: "blog", icon: faComments, path: "/blog" },
@@ -30,7 +30,7 @@ export default function Sidebar() {
             </li>
           </Link>
           {menu.map((menuItem) => (
-            <Link to={menuItem.name} key={menuItem.name}>
+            <Link to={menuItem.path} key={menuItem.name}>
               <li
                 className={`list-side ${
                   selectedMenuItem.pathname === menuItem.path ? "active" : ""

@@ -254,7 +254,6 @@ export default function CryptoTable() {
                     <FontAwesomeIcon icon={faPlus} />
                   </button>
                 </td>
-                {/* Modal */}
               </tr>
             );
           })}
