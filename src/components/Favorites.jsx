@@ -6,7 +6,9 @@ export default function FavoriteList() {
   const [favorites, setFavorites] = useState([]);
   const previousPricesRef = useRef({}); // 🔥 Mantiene i prezzi precedenti
 
-  const priceFormatter = new Intl.NumberFormat("it-IT", {
+  const priceFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 5,
   });
@@ -19,7 +21,8 @@ export default function FavoriteList() {
     } else if (num >= 1_000_000) {
       return (num / 1_000_000).toFixed(2).replace(".", ",") + "M";
     }
-    return num.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return num.toLocaleString("en-US", {  style: "currency",
+      currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   useEffect(() => {
@@ -156,7 +159,7 @@ export default function FavoriteList() {
                         ? "down-price"
                         : ""
                     }>
-                    $ {priceFormatter.format(fav.price)}
+                    {priceFormatter.format(fav.price)}
                   </td>
                   <td>{formatNumberWithSuffix(fav.market_cap)}</td>
                   <td className="pe-5">

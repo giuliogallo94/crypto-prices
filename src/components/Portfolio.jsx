@@ -6,12 +6,16 @@ export default function Favorites() {
   const [portfolio, setPortfolio] = useState([]);
   const previousPricesRef = useRef({}); // 🔥 Mantiene i prezzi precedenti
 
-  const priceFormatter = new Intl.NumberFormat("it-IT", {
+  const priceFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 5,
   });
 
-  const holdingFormatter = new Intl.NumberFormat("it-IT", {
+  const holdingFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
@@ -161,7 +165,9 @@ export default function Favorites() {
           </thead>
           <tbody>
             {portfolio.map((singlePortfolioToken) => {
+              const pnl = singlePortfolioToken.price * singlePortfolioToken.number_of_token_owned - singlePortfolioToken.tot_spent;
               return (
+
                 <tr
                   key={singlePortfolioToken.id}
                   className="table-border-bottom text-center font-bold">
@@ -174,9 +180,11 @@ export default function Favorites() {
                     />
                     <h3>{singlePortfolioToken.name}</h3>
                   </td>
-                  <td>$ {priceFormatter.format(singlePortfolioToken.price)}</td>
-                  <td className="flex flex-col">$ {holdingFormatter.format(singlePortfolioToken.number_of_token_owned * singlePortfolioToken.price)} <span>{parseFloat(singlePortfolioToken.number_of_token_owned).toFixed(2)} {singlePortfolioToken.symbol.toUpperCase()}</span></td>
-                  <td>$ {holdingFormatter.format(singlePortfolioToken.tot_spent)}</td>
+                  <td>{priceFormatter.format(singlePortfolioToken.price)}</td>
+                  <td className="flex flex-col">{holdingFormatter.format(singlePortfolioToken.number_of_token_owned * singlePortfolioToken.price)} <span>{parseFloat(singlePortfolioToken.number_of_token_owned).toFixed(2)} {singlePortfolioToken.symbol.toUpperCase()}</span></td>
+                  <td className={
+                    pnl < 0 ? "down-price" : pnl > 0 ? "up-price" : ""
+                  }> {(pnl > 0 ? "+" : "") + holdingFormatter.format(pnl)}</td>
                   <td className="pe-5">
                     <button style={{ cursor: "pointer" }}>
                       <FontAwesomeIcon

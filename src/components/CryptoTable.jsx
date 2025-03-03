@@ -7,7 +7,6 @@ export default function CryptoTable() {
   const [allCoins, setAllCoins] = useState([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [favorites, setFavorites] = useState([]);
-  // const [portfolio, setPortfolio] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCoin, setSelectedCoin] = useState(null);
   const [transactionType, setTransactionType] = useState("1");
@@ -73,7 +72,7 @@ export default function CryptoTable() {
   const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 2,
     maximumFractionDigits: 5,
   });
 
@@ -189,48 +188,6 @@ export default function CryptoTable() {
       console.error("Errore:", error);
     }
   };
-
-  // const addToPortfolio = async (singleToken) => {
-  //   try {
-  //     const response = await fetch("http://127.0.0.1:8000/api/portfolios", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         api_id: singleToken.id,
-  //         market_cap_rank: singleToken.market_cap_rank,
-  //         symbol: singleToken.symbol,
-  //         name: singleToken.name,
-  //         image: singleToken.image,
-  //         price: singleToken.current_price,
-  //         market_cap: singleToken.market_cap,
-  //       }),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error("Errore nell'aggiunta ai preferiti");
-  //     }
-
-  //     const data = await response.json();
-  //     if (data.success) {
-  //       setFavorites((prevFavorites) => [
-  //         ...prevFavorites,
-  //         {
-  //           api_id: crypto.id,
-  //           market_cap_rank: crypto.market_cap_rank,
-  //           symbol: crypto.symbol,
-  //           name: crypto.name,
-  //           image: crypto.image,
-  //           price: crypto.current_price,
-  //           market_cap: crypto.market_cap,
-  //         },
-  //       ]);
-  //     }
-  //   } catch (error) {
-  //     console.error("Errore:", error);
-  //   }
-  // };
 
   return (
     <div className="main-table flex flex-col items-center">
