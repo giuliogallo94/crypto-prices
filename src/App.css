@@ -182,3 +182,9 @@ thead {
 .portfolio-stats h4 {
   font-weight: bold;
 }
+
+/* SINGLE ARTICLE */
+#single-article {
+  border: 1px solid white;
+  border-radius: 12px;
+}
