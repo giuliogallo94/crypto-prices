@@ -10,8 +10,11 @@ export default  function PortfolioStats({portfolio}) {
             }, { PnL: -Infinity }); // Inizializza con un valore molto basso
 
             setHighestPnLCrypto(updatedHighestPnLCrypto);
+        } else {
+            setHighestPnLCrypto({})
         }
     }, [portfolio]);
+
     const totalSpent = portfolio.reduce((acc, token) => acc + parseFloat(token.tot_spent || 0), 0);
     const yesterdatTotalValue = portfolio?.reduce((acc, token) => acc + parseFloat(token.yesterdayPrice) * parseFloat(token.number_of_token_owned), 0);
     const totalValue = portfolio.reduce((acc, token) => acc + parseFloat(token.price) * parseFloat(token.number_of_token_owned), 0);
@@ -21,8 +24,7 @@ export default  function PortfolioStats({portfolio}) {
     const percentageChange = yesterdatTotalValue !== 0 
                         ? ((totalValue - yesterdatTotalValue) / -yesterdatTotalValue) * 100 
                         : 0;
-    // const highestPnLCrypto = portfolio?.reduce((max, token) => token.PnL > max.PnL ? token : max, portfolio[0]);
-    console.log("Cripto con PnL più alto:", highestPnLCrypto);
+
     const pnl = highestPnLCrypto?.price * highestPnLCrypto?.number_of_token_owned - highestPnLCrypto?.tot_spent;
     const priceFormatter = new Intl.NumberFormat("en-US", {
         style: "currency",
@@ -49,16 +51,16 @@ export default  function PortfolioStats({portfolio}) {
                     <span>24H Change ({percentageChange.toFixed(2)}%)</span>
                 </div>
                 <div className="portfolio-stats">
-                    <div className="flex justify-center">
+                    <div className="flex justify-center items-center">
 
-                <img
-                    src={highestPnLCrypto?.image}
-                    className="crypto-logo mr-1"
-                    alt=""
-                    />
-                    <h4>{highestPnLCrypto?.name}</h4> 
+                        <img
+                        src={highestPnLCrypto?.image}
+                        className="crypto-logo mr-1"
+                        alt=""
+                        />
+                        <h4>{highestPnLCrypto?.name}</h4> 
                     </div>
-                    <span>Top Gainer ({priceFormatter.format(pnl)})</span>
+                    {!isNaN(pnl) && pnl != null ? (<span>Top Gainer ({priceFormatter.format(pnl)})</span>) : (<span>No crypto in portfolio</span>)}
                 </div>
 
             </div>

@@ -211,13 +211,14 @@ export default function Favorites() {
 
 
   return (
-    <>
-      <h2 className="table-title py-5 text-center">My Portfolio</h2>
-    <PortfolioStats portfolio={portfolio}/>
-    <div className="watchlist-table flex flex-col items-center">
+    <div id="portfolio-container" className=" flex flex-col">
+   
+        <h2 className="table-title py-5 text-center">My Portfolio</h2>
+        <PortfolioStats portfolio={portfolio}/>
+    
 
 
-      <div className="table-container">
+      <div className="portfolio-container">
         <table className="crypto-table border table-fixed rounded-xl">
           <thead>
             <tr className="row-table-head table-border-bottom">
@@ -278,7 +279,6 @@ export default function Favorites() {
           }}>
             <ul id="transaction-modal">
               <li className="mb-2" onClick={() => toggleTransactionModal(selectedCoin)}>Add Transaction</li>
-              <li className="mb-2">Update</li>
               <li onClick={() => deleteFromPortfolio(selectedCoin)}>Delete</li>
             </ul>
           </div>
@@ -418,6 +418,5 @@ export default function Favorites() {
     </div>
 
     
-    </>
   );
 }

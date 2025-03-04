@@ -39,22 +39,18 @@
   color: rgb(4, 4, 103);
 }
 
+
+.main-table {
+  max-height: 95vh;
+}
+
 .crypto-table {
   margin: 0 auto;
   width: 75%;
-  height: 80vh;
-  /* border: 1px solid white; */
-
-  /* border-collapse: separate; */
-  /* border-spacing: 0; */
+  height: 85vh;
+  border-collapse: collapse;
   overflow: hidden;
 }
-
-/* #crypto-table th,
-td {
-  border-bottom: 1px solid white;
-  border-top: 1px solid white;
-} */
 
 .crypto-table tr:nth-child(odd) {
   background-color: rgb(40, 86, 157);
@@ -64,42 +60,22 @@ td {
   background-color: rgb(40, 86, 157);
 }
 
-/* #row-table-body td:first-child {
-  border-left: 1px solid white;
-}
-
-#row-table-body td:last-child {
-  border-right: 1px solid white;
-} */
-
-/* #crypto-table tr:first-child th:first-child {
-  border-top-left-radius: 10px;
-  border-left: 1px solid white;
-}
-
-#crypto-table tr:first-child th:last-child {
-  border-top-right-radius: 10px;
-  border-right: 1px solid white;
-}
-#crypto-table tr:last-child td:first-child {
-  border-bottom-left-radius: 10px;
-}
-#crypto-table tr:last-child td:last-child {
-  border-bottom-right-radius: 10px;
-} */
-
-.main-table {
-  max-height: 95vh;
-}
-
-.watchlist-table {
-  max-height: 90vh;
-  overflow: hidden;
-}
-
-.watchlist-table .table-container {
+.fav-container {
   overflow-y: auto; /* Scroll solo all'interno della tabella */
   width: 100%;
+}
+
+.portfolio-container {
+  max-height: 75vh;
+  overflow-y: auto; /* Scroll solo all'interno della tabella */
+  width: 100%;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
 }
 
 .row-table-head th {
@@ -196,7 +172,11 @@ td {
 .portfolio-stats {
   border: 2px solid rgb(40, 86, 157);
   border-radius: 5px;
-  padding: 1rem
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .portfolio-stats h4 {

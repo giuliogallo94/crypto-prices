@@ -121,11 +121,11 @@ export default function FavoriteList() {
   };
 
   return (
-    <div className="watchlist-table flex flex-col items-center">
+    <div className="flex flex-col items-center">
       <h2 className="table-title my-5">Watchlist</h2>
-      <div className="table-container">
+      <div className="fav-container">
         <table className="crypto-table border table-fixed rounded-xl">
-          <thead>
+          <thead className="table-head">
             <tr className="row-table-head table-border-bottom">
               <th className="w-40">Rank</th>
               <th>Cryptocurrency</th>
