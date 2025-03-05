@@ -32,7 +32,10 @@ export default function Favorites() {
     setSelectedCoin(coin);
     setTransactionPrice("0");
     const rect = event.currentTarget.getBoundingClientRect(); // Ottieni la posizione del bottone
-    setModalPosition({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX }); // Imposta la posizione
+    setModalPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX,
+    }); // Imposta la posizione
     console.log(coin);
   };
 
@@ -40,22 +43,19 @@ export default function Favorites() {
     setTransactionTotal(transactionQuantity * transactionPrice);
   }, [transactionQuantity, transactionPrice]);
 
-
-  
   const priceFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 5,
   });
-  
+
   const holdingFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })
-  
+  });
 
   const fetchPortfolioData = async () => {
     try {
@@ -76,23 +76,33 @@ export default function Favorites() {
       const updatedPortfolio = await Promise.all(
         portfolioData.map(async (token) => {
           try {
-            const response = await fetch(`https://api.coingecko.com/api/v3/coins/${token.api_id}`);
+            const response = await fetch(
+              `https://api.coingecko.com/api/v3/coins/${token.api_id}`
+            );
             const marketData = await response.json();
 
             if (!marketData.market_data) {
-              console.warn(`⚠️ Dati di mercato non disponibili per ${token.name}`);
+              console.warn(
+                `⚠️ Dati di mercato non disponibili per ${token.name}`
+              );
               return token; // Ritorna il token originale se i dati sono assenti
             }
 
-            const newPrice = marketData.market_data.current_price?.usd || token.price;
-            const newMarketCap = marketData.market_data.market_cap?.usd || token.market_cap;
-            const marketCapRank = marketData.market_data.market_cap_rank || token.market_cap_rank;
-            const oldPrice = previousPricesRef.current[token.api_id] || token.price;
+            const newPrice =
+              marketData.market_data.current_price?.usd || token.price;
+            const newMarketCap =
+              marketData.market_data.market_cap?.usd || token.market_cap;
+            const marketCapRank =
+              marketData.market_data.market_cap_rank || token.market_cap_rank;
+            const oldPrice =
+              previousPricesRef.current[token.api_id] || token.price;
             const priceChangeDay = marketData.market_data.price_change_24h;
             const actualPrice = marketData.market_data.current_price.usd;
             const yesterdayPrice = actualPrice - priceChangeDay;
 
-            console.log(`📊 ${token.name} - Vecchio prezzo: ${oldPrice}, Nuovo prezzo: ${newPrice}`);
+            console.log(
+              `📊 ${token.name} - Vecchio prezzo: ${oldPrice}, Nuovo prezzo: ${newPrice}`
+            );
 
             return {
               ...token,
@@ -100,10 +110,12 @@ export default function Favorites() {
               market_cap: newMarketCap,
               market_cap_rank: marketCapRank,
               yesterdayPrice: yesterdayPrice,
-
             };
           } catch (error) {
-            console.error(`❌ Errore nel recupero dati di mercato per ${token.name}:`, error);
+            console.error(
+              `❌ Errore nel recupero dati di mercato per ${token.name}:`,
+              error
+            );
             return token; // In caso di errore, ritorna il token senza aggiornamenti
           }
         })
@@ -115,7 +127,6 @@ export default function Favorites() {
       updatedPortfolio.forEach((token) => {
         previousPricesRef.current[token.api_id] = token.price;
       });
-
     } catch (error) {
       console.error("❌ Errore durante il recupero del portafoglio:", error);
     }
@@ -124,14 +135,14 @@ export default function Favorites() {
   const deleteFromPortfolio = async (crypto) => {
     try {
       const response = await fetch(
-       `http://127.0.0.1:8000/api/portfolios/${crypto.api_id}`,
+        `http://127.0.0.1:8000/api/portfolios/${crypto.api_id}`,
         {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
           },
         }
-      )
+      );
 
       if (!response.ok) {
         throw new Error(
@@ -147,7 +158,7 @@ export default function Favorites() {
     } catch (error) {
       console.error("Errore:", error.message);
     }
-  }  
+  };
 
   const updatePortfolio = async (e, crypto) => {
     console.log("la crypto è:", crypto);
@@ -208,15 +219,10 @@ export default function Favorites() {
     return () => clearInterval(interval); // Pulisce l'intervallo quando il componente si smonta
   }, []);
 
-
-
   return (
     <div id="portfolio-container" className=" flex flex-col">
-   
-        <h2 className="table-title py-5 text-center">My Portfolio</h2>
-        <PortfolioStats portfolio={portfolio}/>
-    
-
+      <h2 className="table-title py-5 text-center">My Portfolio</h2>
+      <PortfolioStats portfolio={portfolio} />
 
       <div className="portfolio-container">
         <table className="crypto-table border table-fixed rounded-xl">
@@ -232,12 +238,14 @@ export default function Favorites() {
           </thead>
           <tbody>
             {portfolio.map((singlePortfolioToken) => {
-              const pnl = singlePortfolioToken.price * singlePortfolioToken.number_of_token_owned - singlePortfolioToken.tot_spent;
+              const pnl =
+                singlePortfolioToken.price *
+                  singlePortfolioToken.number_of_token_owned -
+                singlePortfolioToken.tot_spent;
               return (
-
                 <tr
-                key={singlePortfolioToken.id}
-                className="table-border-bottom text-center font-bold h-12">
+                  key={singlePortfolioToken.id}
+                  className="table-border-bottom text-center font-bold h-12">
                   <td>{singlePortfolioToken.market_cap_rank}</td>
                   <td className="flex items-center crypto-name">
                     <img
@@ -248,37 +256,60 @@ export default function Favorites() {
                     <h3>{singlePortfolioToken.name}</h3>
                   </td>
                   <td>{priceFormatter.format(singlePortfolioToken.price)}</td>
-                  <td>{holdingFormatter.format(singlePortfolioToken.number_of_token_owned * singlePortfolioToken.price)} <br/> <span>{parseFloat(singlePortfolioToken.number_of_token_owned).toFixed(2)} {singlePortfolioToken.symbol.toUpperCase()}</span></td>
-                  <td className={
-                    pnl < 0 ? "down-price" : pnl > 0 ? "up-price" : ""
-                  }> {(pnl > 0 ? "+" : "") + holdingFormatter.format(pnl)}</td>
+                  <td>
+                    {holdingFormatter.format(
+                      singlePortfolioToken.number_of_token_owned *
+                        singlePortfolioToken.price
+                    )}{" "}
+                    <br />{" "}
+                    <span>
+                      {parseFloat(
+                        singlePortfolioToken.number_of_token_owned
+                      ).toFixed(2)}{" "}
+                      {singlePortfolioToken.symbol.toUpperCase()}
+                    </span>
+                  </td>
+                  <td
+                    className={
+                      pnl < 0 ? "down-price" : pnl > 0 ? "up-price" : ""
+                    }>
+                    {" "}
+                    {(pnl > 0 ? "+" : "") + holdingFormatter.format(pnl)}
+                  </td>
                   <td className="pe-5">
-                    <button className="pointer" onClick={(e) => toggleInfoModal(e, singlePortfolioToken)}>
-                    :
+                    <button
+                      className="pointer"
+                      onClick={(e) => toggleInfoModal(e, singlePortfolioToken)}>
+                      :
                     </button>
                   </td>
-
-
                 </tr>
               );
             })}
 
-          {[...Array(Math.max(0, 10 - portfolio.length))].map((_, index) => (
-              <tr key={`empty-${index}`} className="table-border-bottom text-center font-bold h-12">
-                <td colSpan="6" className="h-10"></td> 
+            {[...Array(Math.max(0, 10 - portfolio.length))].map((_, index) => (
+              <tr
+                key={`empty-${index}`}
+                className="table-border-bottom text-center font-bold h-12">
+                <td colSpan="6" className="h-10"></td>
               </tr>
-          ))}
+            ))}
           </tbody>
         </table>
 
         {isInfoOpen && (
-          <div id="modal-portfolio-token"  style={{
-            top: `${modalPosition.top}px`,
-            left: `${modalPosition.left}px`,
-            
-          }}>
+          <div
+            id="modal-portfolio-token"
+            style={{
+              top: `${modalPosition.top}px`,
+              left: `${modalPosition.left}px`,
+            }}>
             <ul id="transaction-modal">
-              <li className="mb-2" onClick={() => toggleTransactionModal(selectedCoin)}>Add Transaction</li>
+              <li
+                className="mb-2"
+                onClick={() => toggleTransactionModal(selectedCoin)}>
+                Add Transaction
+              </li>
               <li onClick={() => deleteFromPortfolio(selectedCoin)}>Delete</li>
             </ul>
           </div>
@@ -287,12 +318,15 @@ export default function Favorites() {
 
       {isTransactionOpen && (
         <div
-        id="transaction-modal"
+          id="transaction-modal"
           className="fixed inset-0 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
             <div className="flex justify-between mb-4 items-center grid-cols-3">
               <h2 className="text-xl font-bold">Transaction</h2>
-              <button type="button" className="pointer" onClick={toggleTransactionModal}>
+              <button
+                type="button"
+                className="pointer"
+                onClick={toggleTransactionModal}>
                 x
               </button>
             </div>
@@ -341,9 +375,7 @@ export default function Favorites() {
                 />
                 <p
                   id="current-price"
-                  onClick={() =>
-                    setTransactionPrice(tokenCuPrice)
-                  }
+                  onClick={() => setTransactionPrice(tokenCuPrice)}
                   className="pointer">
                   Market Price
                 </p>
@@ -358,14 +390,15 @@ export default function Favorites() {
                   className="mt-1 p-2 w-full border rounded-md"
                   value={parseFloat(transactionQuantity).toFixed(2)}
                   onChange={(e) => setTransactionQuantity(e.target.value)}
-                  />
-                    <p
+                />
+                <p
                   id="current-price"
                   onClick={() =>
                     setTransactionQuantity(selectedCoin.number_of_token_owned)
                   }
                   className="pointer">
-                  Max Amount({parseFloat(selectedCoin.number_of_token_owned).toFixed(2)})
+                  Max Amount(
+                  {parseFloat(selectedCoin.number_of_token_owned).toFixed(2)})
                 </p>
               </div>
               <div className="mb-3">
@@ -377,7 +410,7 @@ export default function Favorites() {
                   className="mt-1 p-2 w-full border rounded-md"
                   value={transactionTotal}
                   onChange={(e) => setTransactionTotal(e.target.value)}
-                  />
+                />
               </div>
               <div className="mb-3">
                 <label className="block text-sm font-medium text-gray-700">
@@ -388,7 +421,7 @@ export default function Favorites() {
                   className="mt-1 p-2 w-full border rounded-md"
                   value={transactionDate}
                   onChange={(e) => setTransactionDate(e.target.value)}
-                  />
+                />
               </div>
 
               <div className="mb-3">
@@ -398,7 +431,7 @@ export default function Favorites() {
                 <input
                   type="text"
                   className="mt-1 p-2 w-full border rounded-md"
-                  />
+                />
               </div>
 
               <div className="flex justify-end">
@@ -416,7 +449,5 @@ export default function Favorites() {
       )}
       {/* /Modal */}
     </div>
-
-    
   );
 }
