@@ -44,9 +44,7 @@ export default function PagesChange({ pageNumber, onPageChange }) {
   }
 
   return (
-    <ol
-      id="pages-list"
-      className="flex justify-center items-center gap-4 mt-10">
+    <ol id="pages-list" className="flex justify-center items-center gap-4">
       <li>
         <button className="change-page" onClick={() => prevPage(pageNumber)}>
           &#8592;

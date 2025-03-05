@@ -40,7 +40,7 @@
 }
 
 .main-table {
-  max-height: 95vh;
+  max-height: 92vh;
 }
 
 .crypto-table {
@@ -65,7 +65,7 @@
 }
 
 .portfolio-container {
-  max-height: 75vh;
+  max-height: 74vh;
   overflow-y: auto; /* Scroll solo all'interno della tabella */
   width: 100%;
 }
