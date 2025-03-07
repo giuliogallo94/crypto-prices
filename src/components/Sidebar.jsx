@@ -15,7 +15,7 @@ export default function Sidebar() {
     { name: "portfolio", icon: faCoins, path: "/portfolio" },
     { name: "favorites", icon: faStar, path: "/favorites" },
     // { name: "blog", icon: faComments, path: "/blog" },
-    { name: "settings", icon: faGear, path: "/settings" },
+    // { name: "settings", icon: faGear, path: "/settings" },
   ];
   const selectedMenuItem = useLocation();
   const [token, setToken] = useState(localStorage.getItem("token"));

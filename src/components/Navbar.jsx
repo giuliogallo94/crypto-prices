@@ -1,16 +1,21 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 
 export default function Navbar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loggedModal, setLoggedModal] = useState(false);
+  const [loggedModalPosition, setLoggedModalPosition] = useState({ top: 0, left: 0 });
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const userData = JSON.parse(localStorage.getItem("user"))
+console.log(userData)
 
   const registerUser = async (e) => {
     e.preventDefault();
@@ -64,45 +69,61 @@ export default function Navbar() {
   const loginUser = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/login",
-        {
-          method: "POST",
+      // 1. Effettua la richiesta di login
+      const response = await fetch("http://127.0.0.1:8000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        // 2. Salva il token nel localStorage
+        localStorage.setItem("token", data.token);
+        window.dispatchEvent(new Event("storage"));
+
+  
+        // 3. Recupera i dati dell'utente
+        const userResponse = await fetch("http://127.0.0.1:8000/api/user", {
+          method: "GET",
           headers: {
+            "Authorization": `Bearer ${data.token}`, // Passa il token nel header
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            email: email, 
-            password: password,
-          }),
+        });
+  
+        const userData = await userResponse.json();
+  
+        if (userResponse.ok) {
+          // 4. Salva i dati dell'utente nel localStorage
+          localStorage.setItem("user", JSON.stringify(userData));
+          // 5. Aggiorna lo stato dell'autenticazione
+          setIsAuthenticated(true);
+          setIsLoginOpen(false);
+  
+          console.log("Utente loggato!", userData);
+        } else {
+          console.error("Errore nel recupero dei dati utente");
         }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Salva il token nel local storage o nei cookie
-        localStorage.setItem("token", data.token);
-
-        window.dispatchEvent(new Event("storage"));
-        setIsAuthenticated(true);
-        setIsLoginOpen(false);
-        // Esegui altre azioni necessarie, come redirigere l'utente
-        console.log("Utente loggato!");
-      } else {
-        console.error(data.errors || "Errore nella registrazione");
-      }
-
+  
         // ✅ Chiudi il modal e svuota i campi dopo la registrazione
         setName("");
         setEmail("");
         setPassword("");
-
-    
+      } else {
+        console.error(data.errors || "Errore nel login");
+      }
     } catch (error) {
       console.error("Errore:", error.message);
     }
-  }
+  };
+  
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -137,10 +158,19 @@ export default function Navbar() {
       console.error("Errore durante il logout:", error);
     }
   };
-  
 
-  
+  const openLoggedModal = (event) => {
+    setLoggedModal(!loggedModal);
+    
+    const rect = event.currentTarget.getBoundingClientRect(); // Ottieni la posizione del bottone
+    console.log(event.currentTarget.getBoundingClientRect()) 
 
+    setLoggedModalPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.right - (70),
+    }); 
+  };
+  
   return (
     <>
 
@@ -149,14 +179,29 @@ export default function Navbar() {
         <div className="flex justify-center">
           <img src={logo} alt="logo crypto world" />
         </div>
-        <button className="text-right" onClick={() => {setIsLoginOpen(true)}}>
+       
+        {!isAuthenticated ?
+          <button className="text-right" onClick={() => {setIsLoginOpen(true)}}>
+          Login
+        </button> : 
+          <button className="text-right" onClick={(e) => openLoggedModal(e)}>
           <FontAwesomeIcon icon={faUser} />
         </button>
-    {isAuthenticated && <p>UTENTE LOGGATO</p>}
+        }
 
-    {isAuthenticated && <p onClick={logoutUser}>LOGOUT</p>}
-
+        {loggedModal && <div id="modal-portfolio-token" style={{position: "absolute", top: `${loggedModalPosition.top}px`, left: `${loggedModalPosition.left}px`}}>
+          <ul>
+          <Link to="/settings">
+          <li> {userData.name}
+          </li>
+          </Link>
+            <li onClick={logoutUser}>Logout</li>
+          </ul>
+        </div>
+        }
       </nav>
+
+
       {isLoginOpen && (
         <div
           id="login-modal"
