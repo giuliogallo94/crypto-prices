@@ -14,6 +14,7 @@ export default function CryptoTable() {
   const [transactionPrice, setTransactionPrice] = useState("0");
   const [transactionQuantity, setTransactionQuantity] = useState("0");
   const [transactionTotal, setTransactionTotal] = useState("0");
+  
 
   const toggleModal = (coin = null) => {
     setIsOpen(!isOpen);
@@ -35,7 +36,15 @@ export default function CryptoTable() {
   };
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/favorites")
+    const token = localStorage.getItem("token"); // Recupera il token dal localStorage
+  
+    fetch("http://127.0.0.1:8000/api/favorites", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Passa il token di autenticazione
+      },
+    })
       .then((response) => response.json())
       .then((data) => setFavorites(data.data))
       .catch((error) => console.error("Errore:", error));
@@ -78,14 +87,16 @@ export default function CryptoTable() {
 
   const updatePortfolio = async (e, crypto) => {
     e.preventDefault();
-
+    const token = localStorage.getItem("token");
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/api/portfolios/${crypto.id}",
+        `http://127.0.0.1:8000/api/portfolios/${crypto.id}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+
           },
           body: JSON.stringify({
             api_id: crypto.id,
@@ -124,11 +135,14 @@ export default function CryptoTable() {
   };
 
   const addToFavorites = async (crypto) => {
+    const token = localStorage.getItem("token"); // Recupera il token dal localStorage
+
     try {
       const response = await fetch("http://127.0.0.1:8000/api/favorites", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           api_id: crypto.id,

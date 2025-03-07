@@ -140,7 +140,13 @@ thead {
 #transaction-modal {
   background-color: rgba(5, 5, 52, 0.113);
   color: black;
-  z-index: 1;
+  z-index: 21;
+}
+
+#login-modal {
+  background-color: rgba(5, 5, 52, 0.113);
+  color: black;
+  z-index: 20;
 }
 
 #current-price {

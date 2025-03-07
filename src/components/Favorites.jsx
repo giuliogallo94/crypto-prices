@@ -5,6 +5,8 @@ import { faStar } from "@fortawesome/free-solid-svg-icons";
 export default function FavoriteList() {
   const [favorites, setFavorites] = useState([]);
   const previousPricesRef = useRef({}); // 🔥 Mantiene i prezzi precedenti
+  const token = localStorage.getItem("token"); // Recupera il token dal localStorage
+
 
   const priceFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -26,14 +28,20 @@ export default function FavoriteList() {
   };
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/favorites")
+    const token = localStorage.getItem("token");
+    fetch("http://127.0.0.1:8000/api/favorites", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Passa il token di autenticazione
+      },
+    })
       .then((response) => response.json())
-      .then((data) => {
-        setFavorites(data.data);
-        console.log("📌 Dati iniziali caricati:", data.data);
-      })
+      .then((data) => setFavorites(data.data))
       .catch((error) => console.error("Errore:", error));
   }, []);
+
+
 
   useEffect(() => {
     const updatePrices = async () => {
@@ -65,6 +73,7 @@ export default function FavoriteList() {
                 method: "PUT",
                 headers: {
                   "Content-Type": "application/json",
+                  'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                   market_cap_rank: marketCapRank,
@@ -104,6 +113,7 @@ export default function FavoriteList() {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            'Authorization': `Bearer ${token}`,
           },
         }
       );

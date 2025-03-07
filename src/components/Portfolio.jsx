@@ -58,9 +58,16 @@ export default function Favorites() {
   });
 
   const fetchPortfolioData = async () => {
+    const token = localStorage.getItem('token');
     try {
       console.log("📌 Recupero dati dal backend...");
-      const response = await fetch("http://127.0.0.1:8000/api/portfolios");
+      const response = await fetch("http://127.0.0.1:8000/api/portfolios", {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Passa il token come intestazione
+        },
+      });
       const data = await response.json();
 
       if (!data.data) {
