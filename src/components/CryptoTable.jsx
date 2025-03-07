@@ -37,17 +37,19 @@ export default function CryptoTable() {
 
   useEffect(() => {
     const token = localStorage.getItem("token"); // Recupera il token dal localStorage
-  
-    fetch("http://127.0.0.1:8000/api/favorites", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // Passa il token di autenticazione
-      },
-    })
+    if(token){
+
+      fetch("http://127.0.0.1:8000/api/favorites", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Passa il token di autenticazione
+        },
+      })
       .then((response) => response.json())
       .then((data) => setFavorites(data.data))
       .catch((error) => console.error("Errore:", error));
+    }
   }, []);
 
   useEffect(() => {

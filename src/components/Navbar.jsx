@@ -83,6 +83,8 @@ export default function Navbar() {
       if (response.ok) {
         // Salva il token nel local storage o nei cookie
         localStorage.setItem("token", data.token);
+
+        window.dispatchEvent(new Event("storage"));
         setIsAuthenticated(true);
         setIsLoginOpen(false);
         // Esegui altre azioni necessarie, come redirigere l'utente
