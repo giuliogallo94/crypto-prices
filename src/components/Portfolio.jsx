@@ -140,12 +140,14 @@ export default function Favorites() {
   };
 
   const deleteFromPortfolio = async (crypto) => {
+    const token = localStorage.getItem("token");
     try {
       const response = await fetch(
         `http://127.0.0.1:8000/api/portfolios/${crypto.api_id}`,
         {
           method: "DELETE",
           headers: {
+            "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -228,100 +230,108 @@ export default function Favorites() {
 
   return (
     <div id="portfolio-container" className=" flex flex-col">
-      <h2 className="table-title py-5 text-center">My Portfolio</h2>
-      <PortfolioStats portfolio={portfolio} />
+      
 
-      <div className="portfolio-container">
-        <table className="crypto-table border table-fixed rounded-xl">
-          <thead>
-            <tr className="row-table-head table-border-bottom">
-              <th className="w-40">Rank</th>
-              <th>Cryptocurrency</th>
-              <th>Price</th>
-              <th>Holdings</th>
-              <th>PnL</th>
-              <th className="w-10"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {portfolio.map((singlePortfolioToken) => {
-              const pnl =
-                singlePortfolioToken.price *
-                  singlePortfolioToken.number_of_token_owned -
-                singlePortfolioToken.tot_spent;
-              return (
-                <tr
-                  key={singlePortfolioToken.id}
-                  className="table-border-bottom text-center font-bold h-12">
-                  <td>{singlePortfolioToken.market_cap_rank}</td>
-                  <td className="flex items-center crypto-name">
-                    <img
-                      src={singlePortfolioToken.image}
-                      className="crypto-logo mr-5"
-                      alt=""
-                    />
-                    <h3>{singlePortfolioToken.name}</h3>
-                  </td>
-                  <td>{priceFormatter.format(singlePortfolioToken.price)}</td>
-                  <td>
-                    {holdingFormatter.format(
-                      singlePortfolioToken.number_of_token_owned *
-                        singlePortfolioToken.price
-                    )}{" "}
-                    <br />{" "}
-                    <span>
-                      {parseFloat(
-                        singlePortfolioToken.number_of_token_owned
-                      ).toFixed(2)}{" "}
-                      {singlePortfolioToken.symbol.toUpperCase()}
-                    </span>
-                  </td>
-                  <td
-                    className={
-                      pnl < 0 ? "down-price" : pnl > 0 ? "up-price" : ""
-                    }>
-                    {" "}
-                    {(pnl > 0 ? "+" : "") + holdingFormatter.format(pnl)}
-                  </td>
-                  <td className="pe-5">
-                    <button
-                      className="pointer"
-                      onClick={(e) => toggleInfoModal(e, singlePortfolioToken)}>
-                      :
-                    </button>
-                  </td>
+      {
+        portfolio.length > 0 ? (
+        <>
+          <h2 className="table-title py-5 text-center">My Portfolio</h2>
+          <PortfolioStats portfolio={portfolio} />
+          <div className="portfolio-container">
+            <table className="crypto-table border table-fixed rounded-xl">
+              <thead>
+                <tr className="row-table-head table-border-bottom">
+                  <th className="w-40">Rank</th>
+                  <th>Cryptocurrency</th>
+                  <th>Price</th>
+                  <th>Holdings</th>
+                  <th>Avg Buy Price</th>
+                  <th>PnL</th>
+                  <th className="w-10"></th>
                 </tr>
-              );
-            })}
+              </thead>
+              <tbody>
+                {portfolio.map((singlePortfolioToken) => {
+                  const pnl =
+                    singlePortfolioToken.price *
+                      singlePortfolioToken.number_of_token_owned -
+                    singlePortfolioToken.tot_spent;
+                  return (
+                    <tr
+                      key={singlePortfolioToken.id}
+                      className="table-border-bottom text-center font-bold h-12">
+                      <td>{singlePortfolioToken.market_cap_rank}</td>
+                      <td className="flex items-center crypto-name">
+                        <img
+                          src={singlePortfolioToken.image}
+                          className="crypto-logo mr-5"
+                          alt=""
+                        />
+                        <h3>{singlePortfolioToken.name}</h3>
+                      </td>
+                      <td>{priceFormatter.format(singlePortfolioToken.price)}</td>
+                      <td>
+                        {holdingFormatter.format(
+                          singlePortfolioToken.number_of_token_owned *
+                            singlePortfolioToken.price
+                        )}{" "}
+                        <br />{" "}
+                        <span>
+                          {parseFloat(
+                            singlePortfolioToken.number_of_token_owned
+                          ).toFixed(2)}{" "}
+                          {singlePortfolioToken.symbol.toUpperCase()}
+                        </span>
+                      </td>
+                      <td>{priceFormatter.format(singlePortfolioToken.avg_buy_price)}</td>
+                      <td
+                        className={
+                          pnl < 0 ? "down-price" : pnl > 0 ? "up-price" : ""
+                        }>
+                        {" "}
+                        {(pnl > 0 ? "+" : "") + holdingFormatter.format(pnl)}
+                      </td>
+                      <td className="pe-5">
+                        <button
+                          className="pointer"
+                          onClick={(e) => toggleInfoModal(e, singlePortfolioToken)}>
+                          :
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
 
-            {[...Array(Math.max(0, 10 - portfolio.length))].map((_, index) => (
-              <tr
-                key={`empty-${index}`}
-                className="table-border-bottom text-center font-bold h-12">
-                <td colSpan="6" className="h-10"></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                {[...Array(Math.max(0, 10 - portfolio.length))].map((_, index) => (
+                  <tr
+                    key={`empty-${index}`}
+                    className="table-border-bottom text-center font-bold h-12">
+                    <td colSpan="7" className="h-10"></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-        {isInfoOpen && (
-          <div
-            id="modal-portfolio-token"
-            style={{
-              top: `${modalPosition.top}px`,
-              left: `${modalPosition.left}px`,
-            }}>
-            <ul id="transaction-modal">
-              <li
-                className="mb-2"
-                onClick={() => toggleTransactionModal(selectedCoin)}>
-                Add Transaction
-              </li>
-              <li onClick={() => deleteFromPortfolio(selectedCoin)}>Delete</li>
-            </ul>
+            {isInfoOpen && (
+              <div
+                id="modal-portfolio-token"
+                style={{
+                  top: `${modalPosition.top}px`,
+                  left: `${modalPosition.left}px`,
+                }}>
+                <ul id="transaction-modal">
+                  <li
+                    className="mb-2"
+                    onClick={() => toggleTransactionModal(selectedCoin)}>
+                    Add Transaction
+                  </li>
+                  <li onClick={() => deleteFromPortfolio(selectedCoin)}>Delete</li>
+                </ul>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      ) : (<h2 className="table-title py-5 text-center">Your Portfolio is empty</h2>)}
 
       {isTransactionOpen && (
         <div

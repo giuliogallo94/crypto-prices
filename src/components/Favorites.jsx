@@ -106,6 +106,7 @@ export default function FavoriteList() {
   }, [favorites]); // 👈 Dipende solo da favorites, quindi si aggiorna DOPO il render
 
   const removeFromFavorites = async (crypto) => {
+    const token = localStorage.getItem("token");
     try {
       const response = await fetch(
         `http://127.0.0.1:8000/api/favorites/${crypto.api_id}`,
@@ -132,6 +133,8 @@ export default function FavoriteList() {
 
   return (
     <div className="flex flex-col items-center">
+      {
+    favorites.length > 0 ? ( <>
       <h2 className="table-title my-5">Watchlist</h2>
       <div className="fav-container">
         <table className="crypto-table border table-fixed rounded-xl">
@@ -194,6 +197,6 @@ export default function FavoriteList() {
           </tbody>
         </table>
       </div>
-    </div>
-  );
+    </> ) : (<h2 className="table-title my-5">Your Watchlist is empty</h2>)
+  }  </div>);
 }

@@ -62,6 +62,8 @@
 .fav-container {
   overflow-y: auto; /* Scroll solo all'interno della tabella */
   width: 100%;
+  max-height: 84vh;
+
 }
 
 .portfolio-container {
@@ -127,6 +129,18 @@ thead {
   font-family: "Montserrat", sans-serif;
   font-weight: bold;
   color: gold;
+}
+
+.click-here {
+  color:   rgb(4, 4, 103);
+  font-weight: bold;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.login-error {
+  color: #ea3943;
+  font-size: small;
 }
 
 .down-price {

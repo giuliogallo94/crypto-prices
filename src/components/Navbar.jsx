@@ -14,8 +14,8 @@ export default function Navbar() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
-  const userData = JSON.parse(localStorage.getItem("user"))
-console.log(userData)
+  const [userData, setUserData] = useState(null);
+  const [errors, setErrors] = useState(false);
 
   const registerUser = async (e) => {
     e.preventDefault();
@@ -45,15 +45,17 @@ console.log(userData)
       if (response.ok) {
         // Salva il token nel local storage o nei cookie
         localStorage.setItem("token", data.token);
+        setUserData(data.user);
         setIsRegistrationOpen(false);
+        setIsAuthenticated(true);
+
+        window.dispatchEvent(new Event("storage"));
   
         // Esegui altre azioni necessarie, come redirigere l'utente
         console.log("Utente registrato e loggato!");
       } else {
         console.error(data.errors || "Errore nella registrazione");
       }
-
-
 
         // ✅ Chiudi il modal e svuota i campi dopo la registrazione
         setName("");
@@ -82,55 +84,33 @@ console.log(userData)
       });
   
       const data = await response.json();
+      console.log('dati al login:', data);
   
-      if (response.ok) {
-        // 2. Salva il token nel localStorage
+      if (response.ok && data.user && data.token) {
         localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        console.log(data.token, data.user)
+        setIsAuthenticated(true);
+        setIsLoginOpen(false);
+
         window.dispatchEvent(new Event("storage"));
 
-  
-        // 3. Recupera i dati dell'utente
-        const userResponse = await fetch("http://127.0.0.1:8000/api/user", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${data.token}`, // Passa il token nel header
-            "Content-Type": "application/json",
-          },
-        });
-  
-        const userData = await userResponse.json();
-  
-        if (userResponse.ok) {
-          // 4. Salva i dati dell'utente nel localStorage
-          localStorage.setItem("user", JSON.stringify(userData));
-          // 5. Aggiorna lo stato dell'autenticazione
-          setIsAuthenticated(true);
-          setIsLoginOpen(false);
-  
-          console.log("Utente loggato!", userData);
-        } else {
-          console.error("Errore nel recupero dei dati utente");
-        }
-  
-        // ✅ Chiudi il modal e svuota i campi dopo la registrazione
         setName("");
         setEmail("");
         setPassword("");
+        setErrors([]);
       } else {
         console.error(data.errors || "Errore nel login");
+
       }
     } catch (error) {
       console.error("Errore:", error.message);
+      setErrors(true);
     }
   };
   
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsAuthenticated(token !== null);
-  }, [isAuthenticated]);
-
   const logoutUser = async () => {
+ 
     try {
       const token = localStorage.getItem("token");
   
@@ -149,8 +129,10 @@ console.log(userData)
   
       if (response.ok) {
         console.log("Logout riuscito!");
-        localStorage.removeItem("token"); // ✅ Rimuove il token SOLO dopo il logout riuscito
-        window.location.reload(); // Facoltativo: ricarica la pagina per aggiornare lo stato
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        window.location.reload(); 
       } else {
         console.error("Errore durante il logout");
       }
@@ -158,6 +140,11 @@ console.log(userData)
       console.error("Errore durante il logout:", error);
     }
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(token !== null);
+  }, [isAuthenticated]);
 
   const openLoggedModal = (event) => {
     setLoggedModal(!loggedModal);
@@ -192,7 +179,8 @@ console.log(userData)
         {loggedModal && <div id="modal-portfolio-token" style={{position: "absolute", top: `${loggedModalPosition.top}px`, left: `${loggedModalPosition.left}px`}}>
           <ul>
           <Link to="/settings">
-          <li> {userData.name}
+          <li> 
+           {userData.name} 
           </li>
           </Link>
             <li onClick={logoutUser}>Logout</li>
@@ -212,7 +200,10 @@ console.log(userData)
               <button
                 type="button"
                 className="pointer"
-                onClick={() => setIsLoginOpen(false)}>
+                onClick={() => { 
+                  setIsLoginOpen(false); 
+                  setErrors(false); 
+                }}>
                 x
               </button>
             </div>
@@ -228,7 +219,7 @@ console.log(userData)
                 />
               </div>
 
-              <div className="mb-3">
+              <div >
                 <label className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
@@ -239,11 +230,16 @@ console.log(userData)
                 />
             
               </div>
+
+              {errors && (
+                <div className="login-error text-right mb-3">
+                  <span>The credentials are incorrect</span>
+                </div>
+              )}
             
               <div>
                 <p>
-                  Not registered? 
-                  <span onClick={() => {setIsRegistrationOpen(true); setIsLoginOpen(false)}}>
+                  Not registered? <span className="click-here" onClick={() => {setIsRegistrationOpen(true); setIsLoginOpen(false)}}>
                     Click here
                   </span>
                 </p>
@@ -313,7 +309,7 @@ console.log(userData)
                />
            
              </div>
-             <div className="mb-3">
+             <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Confirm Password
                 </label>
@@ -326,8 +322,7 @@ console.log(userData)
               </div>
              <div>
                <p>
-                 Already registered? 
-                 <span onClick={() => {setIsRegistrationOpen(false); setIsLoginOpen(true)}}>
+                 Already registered? <span className="click-here" onClick={() => {setIsRegistrationOpen(false); setIsLoginOpen(true)}}>
                    Click here
                  </span>
                </p>
