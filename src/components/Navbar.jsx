@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
@@ -10,19 +12,17 @@ export default function Navbar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loggedModal, setLoggedModal] = useState(false);
   const [loggedModalPosition, setLoggedModalPosition] = useState({ top: 0, left: 0 });
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirmation, setPasswordConfirmation] = useState("");
-  const [userData, setUserData] = useState(null);
-  const [errors, setErrors] = useState(false);
+  const [loginErrors, setLoginErrors] = useState(false)
+  const { register , formState: { errors }, watch, handleSubmit } = useForm();
+  const password = watch('registrationPassword', '');
 
-  const registerUser = async (e) => {
-    e.preventDefault();
+  const loggedUser = JSON.parse(localStorage.getItem("user"));
+  console.log(loggedUser)
 
-    console.log(name, email, password, passwordConfirmation);
+
+  const registerUser = async (formData) => {
+    console.log(formData);
     
-
     try {
       const response = await fetch(
         "http://127.0.0.1:8000/api/register",
@@ -32,10 +32,10 @@ export default function Navbar() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name: name,
-            email: email, 
-            password: password,
-            password_confirmation: passwordConfirmation
+            name: formData.registrationName,
+            email: formData.registrationEmail, 
+            password: formData.registrationPassword,
+            password_confirmation: formData.registrationPasswordConfirmation
           }),
         }
       );
@@ -45,7 +45,7 @@ export default function Navbar() {
       if (response.ok) {
         // Salva il token nel local storage o nei cookie
         localStorage.setItem("token", data.token);
-        setUserData(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user));
         setIsRegistrationOpen(false);
         setIsAuthenticated(true);
 
@@ -56,20 +56,42 @@ export default function Navbar() {
       } else {
         console.error(data.errors || "Errore nella registrazione");
       }
-
-        // ✅ Chiudi il modal e svuota i campi dopo la registrazione
-        setName("");
-        setEmail("");
-        setPassword("");
-
-    
     } catch (error) {
       console.error("Errore:", error.message);
     }
   }
   
-  const loginUser = async (e) => {
-    e.preventDefault();
+  //   let isValid = true;
+  //   const newErrors = { email: "", password: "" };
+
+  //   // Validazione email
+  //   if (!email) {
+  //     newErrors.email = "L'email è obbligatoria";
+  //     isValid = false;
+  //   } else if (!/\S+@\S+\.\S+/.test(email)) {
+  //     newErrors.email = "Inserisci un'email valida";
+  //     isValid = false;
+  //   }
+
+  //   // Validazione password
+  //   if (!password) {
+  //     newErrors.password = "La password è obbligatoria";
+  //     isValid = false;
+  //   } else if (password.length < 6) {
+  //     newErrors.password = "La password deve contenere almeno 6 caratteri";
+  //     isValid = false;
+  //   }
+
+  //   setLoginErrors(newErrors);
+  //   window.dispatchEvent(new Event("storage"));
+
+  //   return isValid;
+  // };
+
+  const loginUser = async (formData) => {
+    console.log("login partito", formData)
+    setLoginErrors(false);
+
     try {
       // 1. Effettua la richiesta di login
       const response = await fetch("http://127.0.0.1:8000/api/login", {
@@ -78,8 +100,8 @@ export default function Navbar() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: email,
-          password: password,
+          email: formData.loginEmail,
+          password: formData.loginPassword,
         }),
       });
   
@@ -89,23 +111,21 @@ export default function Navbar() {
       if (response.ok && data.user && data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        console.log(data.token, data.user)
+
+
         setIsAuthenticated(true);
         setIsLoginOpen(false);
 
         window.dispatchEvent(new Event("storage"));
 
-        setName("");
-        setEmail("");
-        setPassword("");
-        setErrors([]);
+        setLoginErrors([]);
       } else {
         console.error(data.errors || "Errore nel login");
 
       }
     } catch (error) {
       console.error("Errore:", error.message);
-      setErrors(true);
+      setLoginErrors(true);
     }
   };
   
@@ -133,6 +153,8 @@ export default function Navbar() {
         localStorage.removeItem("user");
 
         window.location.reload(); 
+        useNavigate("/")
+
       } else {
         console.error("Errore durante il logout");
       }
@@ -157,6 +179,14 @@ export default function Navbar() {
       left: rect.right - (70),
     }); 
   };
+
+ 
+  //   console.log(validateLoginForm(), loginErrors)
+  //   e.preventDefault();
+  //   if (validateLoginForm()) {
+  //     loginUser();
+  //   }
+  // };
   
   return (
     <>
@@ -180,7 +210,7 @@ export default function Navbar() {
           <ul>
           <Link to="/settings">
           <li> 
-           {userData.name} 
+           {loggedUser.name}
           </li>
           </Link>
             <li onClick={logoutUser}>Logout</li>
@@ -202,36 +232,42 @@ export default function Navbar() {
                 className="pointer"
                 onClick={() => { 
                   setIsLoginOpen(false); 
-                  setErrors(false); 
+                  setLoginErrors(false); 
                 }}>
                 x
               </button>
             </div>
 
             {/* Form per inserire i dati */}
-            <form onSubmit={loginUser}>
+            <form onSubmit={handleSubmit((data) => loginUser(data))}>
+
               <div className="mb-3">
                 <label className="block text-sm font-medium">Email</label>
                 <input
+                  {...register ("loginEmail", {required:"Email is required",  
+                    pattern: { value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                    message: "Insert valid email",
+                  }, })} 
                   type="text"
                   className="mt-1 p-2 ps-8 w-full border rounded-md"  
-                  onChange={(e) => setEmail(e.target.value)}              
+                               
                 />
+                  {errors.loginEmail  && <p className="login-error">{errors.loginEmail.message}</p>}
               </div>
 
               <div >
                 <label className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <input
+                <input {...register ("loginPassword", {required: "Password is required"})}
                   type="password"
                   className="mt-1 p-2 w-full border rounded-md"
-                  onChange={(e) => setPassword(e.target.value)}
+                 
                 />
-            
+               {errors.loginPassword && <p className="login-error">{errors.loginPassword.message}</p>}
               </div>
 
-              {errors && (
+              {loginErrors && (
                 <div className="login-error text-right mb-3">
                   <span>The credentials are incorrect</span>
                 </div>
@@ -239,26 +275,23 @@ export default function Navbar() {
             
               <div>
                 <p>
-                  Not registered? <span className="click-here" onClick={() => {setIsRegistrationOpen(true); setIsLoginOpen(false)}}>
+                  Not registered? <span className="click-here" onClick={() => {setIsRegistrationOpen(true); setIsLoginOpen(false);setLoginErrors()}}>
                     Click here
                   </span>
                 </p>
               </div>
-
-
-
-              
-          
 
               <div className="flex justify-end">
                 <button
                   type="submit"
                   style={{ backgroundColor: "#16c784" }}
                   className="pointer px-4 py-2 text-white rounded-md"
+                 
                >
                   Login
                 </button>
               </div>
+             
             </form>
           </div>
         </div>
@@ -280,22 +313,33 @@ export default function Navbar() {
            </div>
 
            {/* Form per inserire i dati */}
-           <form onSubmit={registerUser}>
+           <form onSubmit={handleSubmit((data) => registerUser(data))}>
            <div className="mb-3">
                <label className="block text-sm font-medium">Name</label>
                <input
+               {...register ("registrationName", {required:"Name is required",  
+                pattern: {
+                  value: /^[A-Z][a-zA-Z]*$/,  
+                  message: "Insert valid Name(only letters, start with uppercase)",
+                }, })} 
                  type="text"
                  className="mt-1 p-2 ps-8 w-full border rounded-md"
-                 onChange={(e) => setName(e.target.value)}                
                />
+                {errors.registrationName && <p className="login-error">{errors.registrationName.message}</p>}
              </div>
+
              <div className="mb-3">
                <label className="block text-sm font-medium">Email</label>
                <input
+                {...register ("registrationEmail", {required:"Email is required",  
+                  pattern: { value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                  message: "Insert valid email",
+                }, })} 
                  type="text"
                  className="mt-1 p-2 ps-8 w-full border rounded-md"   
-                 onChange={(e) => setEmail(e.target.value)}             
                />
+                {errors.registrationEmail && <p className="login-error">{errors.registrationEmail.message}</p>}
+
              </div>
 
              <div className="mb-3">
@@ -303,10 +347,14 @@ export default function Navbar() {
                  Password
                </label>
                <input
+               {...register ("registrationPassword", {required: "Password is required",   pattern: {
+                value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{}|;:'",.<>/?]).{8,}$/,
+                message: "Password must be at least 8 characters long, with a mix of uppercase, lowercase, digits, and special characters.",
+              },})}
                  type="password"
                  className="mt-1 p-2 w-full border rounded-md"
-                 onChange={(e) => setPassword(e.target.value)}
                />
+                {errors.registrationPassword && <p className="login-error">{errors.registrationPassword.message}</p>}
            
              </div>
              <div>
@@ -314,11 +362,15 @@ export default function Navbar() {
                   Confirm Password
                 </label>
                 <input
-                onChange={(e) => setPasswordConfirmation(e.target.value)}
                   type="password"
+                  {...register("registrationPasswordConfirmation", {
+                    required: "Password confirmation is required",
+                    validate: (value) => value === password || "Passwords must match", // Confronta con la password
+                  })}
                   className="mt-1 p-2 w-full border rounded-md"
                 />
-            
+                {errors.registrationPasswordConfirmation && <p className="login-error">{errors.registrationPasswordConfirmation.message}</p>}
+
               </div>
              <div>
                <p>
@@ -336,6 +388,7 @@ export default function Navbar() {
                  type="submit"
                  style={{ backgroundColor: "#16c784" }}
                  className="pointer px-4 py-2 text-white rounded-md"
+                 
               >
                  Register
                </button>
