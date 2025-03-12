@@ -46,9 +46,9 @@ export default function Sidebar() {
                 <FontAwesomeIcon icon={faChartLine} />
           </li>
           </Link>
-          <Link to="/blog">
+          <Link to="/news">
           <li className={`list-side ${
-                  selectedMenuItem.pathname === '/blog' ? "active" : ""
+                  selectedMenuItem.pathname === '/news' ? "active" : ""
                 }`}>
                 <FontAwesomeIcon icon={faComments} />
           </li>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import SingleArticle from "./SingleArticle";
 
-export default function Blog() {
+export default function News() {
   const [articles, setArticles] = useState([]);
 
   useEffect(() => {

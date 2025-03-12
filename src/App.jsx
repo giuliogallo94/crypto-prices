@@ -4,7 +4,7 @@ import CryptoTable from "./components/CryptoTable";
 import Portfolio from "./components/Portfolio";
 import Layout from "./components/Layout";
 import Favorites from "./components/Favorites";
-import Blog from "./components/Blog";
+import News from "./components/News";
 import Settings from "./components/Settings";
 
 const router = createBrowserRouter([
@@ -15,7 +15,7 @@ const router = createBrowserRouter([
       { path: "/", element: <CryptoTable /> },
       { path: "/portfolio", element: <Portfolio /> },
       { path: "/favorites", element: <Favorites /> },
-      { path: "/blog", element: <Blog /> },
+      { path: "/news", element: <News /> },
       { path: "/settings", element: <Settings /> },
     ],
   },
