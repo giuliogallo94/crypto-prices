@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import PagesChange from "./PagesChange";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar, faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -9,27 +10,27 @@ export default function CryptoTable() {
   const [favorites, setFavorites] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCoin, setSelectedCoin] = useState(null);
-  const [transactionType, setTransactionType] = useState("1");
-  const [transactionDate, setTransactionDate] = useState("");
-  const [transactionPrice, setTransactionPrice] = useState("0");
-  const [transactionQuantity, setTransactionQuantity] = useState("0");
-  const [transactionTotal, setTransactionTotal] = useState("0");
-  const token = localStorage.getItem("token"); 
+ 
+  const { register, setValue, watch, handleSubmit, reset } = useForm();
+  const transactionQuantity = watch("transactionQuantity", 0); 
+  const transactionPrice = watch("transactionPrice", 0);
+  const transactionType = watch("transactionType", "1");
+
+  useEffect(() => {
+    setValue("transactionTotal", transactionQuantity * transactionPrice);
+  }, [transactionQuantity, transactionPrice, setValue]);
+
+  const token = localStorage.getItem("token");
 
   const toggleModal = (coin = null) => {
     setIsOpen(!isOpen);
     setSelectedCoin(coin);
 
-    console.log(coin);
-
     const now = new Date();
     const formattedDateTime = now.toISOString().slice(0, 16);
-    setTransactionDate(formattedDateTime);
+    
+    setValue("transactionDate", formattedDateTime);
   };
-
-  useEffect(() => {
-    setTransactionTotal(transactionQuantity * transactionPrice);
-  }, [transactionQuantity, transactionPrice]);
 
   const handlePageChange = (newPage) => {
     setPageNumber(newPage);
@@ -43,7 +44,7 @@ export default function CryptoTable() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
       })
       .then((response) => response.json())
@@ -87,9 +88,10 @@ export default function CryptoTable() {
     maximumFractionDigits: 5,
   });
 
-  const updatePortfolio = async (e, crypto) => {
-    e.preventDefault();
+  const updatePortfolio = async (crypto, formData) => {
     const token = localStorage.getItem("token");
+
+
     try {
       const response = await fetch(
         `http://127.0.0.1:8000/api/portfolios/${crypto.id}`,
@@ -105,10 +107,10 @@ export default function CryptoTable() {
             symbol: crypto.symbol,
             name: crypto.name,
             image: crypto.image,
-            tot_spent: transactionTotal,
-            type_of_transaction: transactionType,
-            number_of_token: transactionQuantity,
-            transaction_price: transactionPrice,
+            tot_spent: formData.transactionTotal,
+            type_of_transaction: formData.transactionType,
+            number_of_token: formData.transactionQuantity,
+            transaction_price: formData.transactionPrice,
           }),
         }
       );
@@ -122,12 +124,6 @@ export default function CryptoTable() {
       }
 
       console.log("Transazione aggiunta con successo:", data);
-
-      // Resetta i valori del form dopo l'inserimento
-      setTransactionPrice("");
-      setTransactionQuantity("");
-      setTransactionTotal("");
-      setTransactionDate("");
 
       // Chiude il modal dopo il successo
       toggleModal();
@@ -268,7 +264,7 @@ export default function CryptoTable() {
                   }>
                   {formatter.format(singleCoin.price_change_24h)}
                 </td>
-                  {token && 
+                  {token &&
                 <td className="pe-5">
                   <button
                     className="pointer"
@@ -289,18 +285,21 @@ export default function CryptoTable() {
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
             <div className="flex justify-between mb-4 items-center grid-cols-3">
               <h2 className="text-xl font-bold">Transaction</h2>
-              <button type="button" className="pointer" onClick={toggleModal}>
+              <button type="button" className="pointer" onClick={() => {toggleModal(); reset()}}>
                 x
               </button>
             </div>
 
             {/* Form per inserire i dati */}
-            <form>
+            {/* <form onSubmit={handleSubmit((data) => updatePortfolio(data))}> */}
+            <form onSubmit={handleSubmit((data) => updatePortfolio(selectedCoin, data))}>
+
               <div className="mb-3">
                 <label className="block text-sm font-medium">Asset</label>
                 <input
                   type="text"
                   className="mt-1 p-2 ps-8 w-full border rounded-md"
+                  {...register ("transactionCryptoName", {required: "The field is required"})}
                   value={selectedCoin.name}
                   readOnly
                   style={{
@@ -317,9 +316,9 @@ export default function CryptoTable() {
                   Transaction
                 </label>
                 <select
-                  value={transactionType}
+                  {...register ("transactionType", {required: "The field is required"})}
                   className="mt-1 p-2 w-full border rounded-md"
-                  onChange={(e) => setTransactionType(e.target.value)}>
+                  >
                   <option value="1">Buy</option>
                   <option value="2">Sell</option>
                 </select>
@@ -331,15 +330,15 @@ export default function CryptoTable() {
                   {transactionType === "2" && "Sell Price"}
                 </label>
                 <input
+                  {...register ("transactionPrice", {required: "The field is required"})}
                   type="number"
+                  step="any" 
                   className="mt-1 p-2 w-full border rounded-md"
-                  value={transactionPrice}
-                  onChange={(e) => setTransactionPrice(e.target.value)}
                 />
                 <p
                   id="current-price"
                   onClick={() =>
-                    setTransactionPrice(selectedCoin.current_price)
+                    setValue("transactionPrice", selectedCoin.current_price)
                   }
                   className="pointer">
                   Market Price
@@ -351,10 +350,10 @@ export default function CryptoTable() {
                   Quantity
                 </label>
                 <input
+                  {...register ("transactionQuantity", {required: "The field is required"})}
                   type="number"
+                  step="any" 
                   className="mt-1 p-2 w-full border rounded-md"
-                  value={transactionQuantity}
-                  onChange={(e) => setTransactionQuantity(e.target.value)}
                 />
               </div>
               <div className="mb-3">
@@ -362,10 +361,10 @@ export default function CryptoTable() {
                   Total
                 </label>
                 <input
+                  {...register ("transactionTotal", {required: "The field is required"})}
                   type="number"
+                  step="any" 
                   className="mt-1 p-2 w-full border rounded-md"
-                  value={transactionTotal}
-                  onChange={(e) => setTransactionTotal(e.target.value)}
                 />
               </div>
               <div className="mb-3">
@@ -373,10 +372,9 @@ export default function CryptoTable() {
                   Date and Time
                 </label>
                 <input
+                  {...register ("transactionDate", {required: "The field is required"}, )}
                   type="datetime-local"
                   className="mt-1 p-2 w-full border rounded-md"
-                  value={transactionDate}
-                  onChange={(e) => setTransactionDate(e.target.value)}
                 />
               </div>
 
@@ -385,6 +383,7 @@ export default function CryptoTable() {
                   Note
                 </label>
                 <input
+                {...register ("transactionNote")}
                   type="text"
                   className="mt-1 p-2 w-full border rounded-md"
                 />
@@ -394,8 +393,7 @@ export default function CryptoTable() {
                 <button
                   type="submit"
                   style={{ backgroundColor: "#16c784" }}
-                  className="pointer px-4 py-2 text-white rounded-md"
-                  onClick={(e) => updatePortfolio(e, selectedCoin)}>
+                  className="pointer px-4 py-2 text-white rounded-md">
                   Add Transaction
                 </button>
               </div>
