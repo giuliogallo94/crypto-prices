@@ -37,7 +37,7 @@ export default function News() {
   return (
     <div className="news-container flex flex-col">
       <h1 className="news-title text-center py-5">Latest News</h1>
-      <div className="news-grid grid grid-cols-4 gap-5 px-5">
+      <div className="news-grid grid grid-cols-3 gap-5 px-5">
         {articles.map((singleArticle) => {
           return (
             <SingleArticle

@@ -5,11 +5,11 @@ export default function SingleArticle({ singleArticle }) {
     let tempDiv = document.createElement("div");
     tempDiv.innerHTML = html;
     let text = tempDiv.textContent || tempDiv.innerText || "";
-    return text.length > 150 ? text.substring(0, 150) + "..." : text;
+    return text.length > 100 ? text.substring(0, 100) + "..." : text;
   }
 
   return (
-    <div id="single-article" className="flex flex-col">
+    <div className="single-article flex flex-col justify-between">
       {singleArticle.image && (
         <img
           src={singleArticle.image}
@@ -17,10 +17,10 @@ export default function SingleArticle({ singleArticle }) {
           className="article-image w-full h-auto"
         />
       )}
-      <h2 className="p-3 text-center font-bold">{singleArticle.title}</h2>
+      <h2 className="p-3 text-center font-bold">{singleArticle.title.substring(0, 60) + "..."}</h2>
 
       <p className="px-2">{stripHtml(singleArticle.content)}</p>
-      <a className="read-more" href={singleArticle.link} target="_blank">
+      <a className="read-more mb-3" href={singleArticle.link} target="_blank">
         <span>Read more</span>
       </a>
     </div>

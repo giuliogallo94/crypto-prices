@@ -225,7 +225,7 @@ thead {
   color: gold;
 }
 
-#single-article {
+.single-article {
   border-radius: 12px;
   background-color: rgb(40, 86, 157);
 }
@@ -238,8 +238,7 @@ thead {
   border-top-right-radius: 12px;
 }
 
-#single-article h2 {
-  height: 12vh;
+.single-article h2 {
   color: gold;
 }
 
