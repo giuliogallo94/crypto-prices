@@ -91,7 +91,7 @@ export default function CryptoTable() {
   const updatePortfolio = async (crypto, formData) => {
     const token = localStorage.getItem("token");
 
-
+    
     try {
       const response = await fetch(
         `http://127.0.0.1:8000/api/portfolios/${crypto.id}`,
@@ -124,6 +124,7 @@ export default function CryptoTable() {
       }
 
       console.log("Transazione aggiunta con successo:", data);
+      reset()
 
       // Chiude il modal dopo il successo
       toggleModal();
@@ -299,7 +300,6 @@ export default function CryptoTable() {
                 <input
                   type="text"
                   className="mt-1 p-2 ps-8 w-full border rounded-md"
-                  {...register ("transactionCryptoName", {required: "The field is required"})}
                   value={selectedCoin.name}
                   readOnly
                   style={{

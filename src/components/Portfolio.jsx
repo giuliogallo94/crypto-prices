@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { useForm } from "react-hook-form";
+
 import PortfolioStats from "./PortfolioStats";
 
 export default function Favorites() {
@@ -7,30 +9,30 @@ export default function Favorites() {
   const [isTransactionOpen, setIsTransactionOpen] = useState(false);
   const [selectedCoin, setSelectedCoin] = useState(null);
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
-  const [transactionType, setTransactionType] = useState("1");
-  const [transactionDate, setTransactionDate] = useState("");
-  const [transactionPrice, setTransactionPrice] = useState("0");
-  const [transactionQuantity, setTransactionQuantity] = useState("0");
-  const [transactionTotal, setTransactionTotal] = useState("0");
-  const [tokenCuPrice, setTokenCurPrice] = useState("0");
   const previousPricesRef = useRef({}); // 🔥 Mantiene i prezzi precedenti
+
+  const { register, setValue, watch, handleSubmit, reset } = useForm();
+    const transactionQuantity = watch("transactionQuantity", 0); 
+    const transactionPrice = watch("transactionPrice", 0);
+    const transactionType = watch("transactionType", "1");
+  
+  useEffect(() => {
+    setValue("transactionTotal", transactionQuantity * transactionPrice);
+  }, [transactionQuantity, transactionPrice, setValue]);
 
   const toggleTransactionModal = (coin) => {
     setIsInfoOpen(false);
     setIsTransactionOpen(!isTransactionOpen);
-    const now = new Date();
-    setTokenCurPrice(coin.price);
-    setTransactionPrice("0");
-    setTransactionType("1");
 
-    const formattedDateTime = now.toISOString().slice(0, 16); // Formatta per datetime-local
-    setTransactionDate(formattedDateTime);
+    const now = new Date();
+    const formattedDateTime = now.toISOString().slice(0, 16);
+    setValue("transactionDate", formattedDateTime);
+
   };
 
   const toggleInfoModal = (event, coin) => {
     setIsInfoOpen(!isInfoOpen);
     setSelectedCoin(coin);
-    setTransactionPrice("0");
     const rect = event.currentTarget.getBoundingClientRect(); // Ottieni la posizione del bottone
     setModalPosition({
       top: rect.bottom + window.scrollY,
@@ -38,10 +40,6 @@ export default function Favorites() {
     }); // Imposta la posizione
     console.log(coin);
   };
-
-  useEffect(() => {
-    setTransactionTotal(transactionQuantity * transactionPrice);
-  }, [transactionQuantity, transactionPrice]);
 
   const priceFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -169,27 +167,30 @@ export default function Favorites() {
     }
   };
 
-  const updatePortfolio = async (e, crypto) => {
-    console.log("la crypto è:", crypto);
-    e.preventDefault();
+  const updatePortfolio = async (crypto, formData) => {
+    console.log(crypto, formData);
+
+    const token = localStorage.getItem("token");
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/api/portfolios/${crypto.id}",
+        `http://127.0.0.1:8000/api/portfolios/${crypto.api_id}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+
           },
           body: JSON.stringify({
             api_id: crypto.api_id,
             symbol: crypto.symbol,
             name: crypto.name,
             image: crypto.image,
-            tot_spent: transactionTotal,
-            type_of_transaction: transactionType,
-            number_of_token: transactionQuantity,
-            transaction_price: transactionPrice,
+            tot_spent: formData.transactionTotal,
+            type_of_transaction: formData.transactionType,
+            number_of_token: formData.transactionQuantity,
+            transaction_price: formData.transactionPrice,
           }),
         }
       );
@@ -206,12 +207,7 @@ export default function Favorites() {
 
       fetchPortfolioData();
 
-      // Resetta i valori del form dopo l'inserimento
-      setTransactionPrice("0");
-      setTransactionQuantity("0");
-      setTransactionTotal("0");
-      setTransactionDate("");
-      setTokenCurPrice("0");
+      reset()
 
       // Chiude il modal dopo il successo
       setIsTransactionOpen(false);
@@ -343,13 +339,13 @@ export default function Favorites() {
               <button
                 type="button"
                 className="pointer"
-                onClick={toggleTransactionModal}>
+                onClick={() => {toggleTransactionModal(); reset()}}>
                 x
               </button>
             </div>
 
             {/* Form per inserire i dati */}
-            <form>
+            <form onSubmit={handleSubmit((data) => updatePortfolio(selectedCoin, data))}>
               <div className="mb-3">
                 <label className="block text-sm font-medium">Asset</label>
                 <input
@@ -371,9 +367,8 @@ export default function Favorites() {
                   Transaction
                 </label>
                 <select
-                  value={transactionType}
-                  className="mt-1 p-2 w-full border rounded-md"
-                  onChange={(e) => setTransactionType(e.target.value)}>
+                 {...register ("transactionType", {required: "The field is required"})}
+                  className="mt-1 p-2 w-full border rounded-md">
                   <option value="1">Buy</option>
                   <option value="2">Sell</option>
                 </select>
@@ -385,14 +380,14 @@ export default function Favorites() {
                   {transactionType === "2" && "Sell Price"}
                 </label>
                 <input
+                  {...register ("transactionPrice", {required: "The field is required"})}
                   type="number"
+                  step="any" 
                   className="mt-1 p-2 w-full border rounded-md"
-                  value={transactionPrice}
-                  onChange={(e) => setTransactionPrice(e.target.value)}
                 />
                 <p
                   id="current-price"
-                  onClick={() => setTransactionPrice(tokenCuPrice)}
+                  onClick={() => setValue("transactionPrice", selectedCoin.current_price)}
                   className="pointer">
                   Market Price
                 </p>
@@ -403,15 +398,15 @@ export default function Favorites() {
                   Quantity
                 </label>
                 <input
+                  {...register ("transactionQuantity", {required: "The field is required"})}
                   type="number"
+                  step="any" 
                   className="mt-1 p-2 w-full border rounded-md"
-                  value={parseFloat(transactionQuantity).toFixed(2)}
-                  onChange={(e) => setTransactionQuantity(e.target.value)}
                 />
                 <p
                   id="current-price"
                   onClick={() =>
-                    setTransactionQuantity(selectedCoin.number_of_token_owned)
+                    setValue("transactionQuantity", selectedCoin.number_of_token_owned)
                   }
                   className="pointer">
                   Max Amount(
@@ -423,10 +418,10 @@ export default function Favorites() {
                   Total
                 </label>
                 <input
+                  {...register ("transactionTotal", {required: "The field is required"})}
                   type="number"
+                  step="any" 
                   className="mt-1 p-2 w-full border rounded-md"
-                  value={transactionTotal}
-                  onChange={(e) => setTransactionTotal(e.target.value)}
                 />
               </div>
               <div className="mb-3">
@@ -434,10 +429,9 @@ export default function Favorites() {
                   Date and Time
                 </label>
                 <input
+                  {...register ("transactionDate", {required: "The field is required"}, )}
                   type="datetime-local"
                   className="mt-1 p-2 w-full border rounded-md"
-                  value={transactionDate}
-                  onChange={(e) => setTransactionDate(e.target.value)}
                 />
               </div>
 
@@ -455,8 +449,7 @@ export default function Favorites() {
                 <button
                   type="submit"
                   style={{ backgroundColor: "#16c784" }}
-                  className="pointer px-4 py-2 text-white rounded-md"
-                  onClick={(e) => updatePortfolio(e, selectedCoin)}>
+                  className="pointer px-4 py-2 text-white rounded-md">
                   Add Transaction
                 </button>
               </div>
