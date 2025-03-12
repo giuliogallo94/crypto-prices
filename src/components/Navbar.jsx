@@ -59,34 +59,7 @@ export default function Navbar() {
       console.error("Errore:", error.message);
     }
   }
-  
-  //   let isValid = true;
-  //   const newErrors = { email: "", password: "" };
-
-  //   // Validazione email
-  //   if (!email) {
-  //     newErrors.email = "L'email è obbligatoria";
-  //     isValid = false;
-  //   } else if (!/\S+@\S+\.\S+/.test(email)) {
-  //     newErrors.email = "Inserisci un'email valida";
-  //     isValid = false;
-  //   }
-
-  //   // Validazione password
-  //   if (!password) {
-  //     newErrors.password = "La password è obbligatoria";
-  //     isValid = false;
-  //   } else if (password.length < 6) {
-  //     newErrors.password = "La password deve contenere almeno 6 caratteri";
-  //     isValid = false;
-  //   }
-
-  //   setLoginErrors(newErrors);
-  //   window.dispatchEvent(new Event("storage"));
-
-  //   return isValid;
-  // };
-
+ 
   const loginUser = async (formData) => {
     console.log("login partito", formData)
     setLoginErrors(false);
@@ -171,7 +144,7 @@ export default function Navbar() {
   const openLoggedModal = (event) => {
     setLoggedModal(!loggedModal);
     
-    const rect = event.currentTarget.getBoundingClientRect(); // Ottieni la posizione del bottone
+    const rect = event.currentTarget.getBoundingClientRect(); 
     console.log(event.currentTarget.getBoundingClientRect()) 
 
     setLoggedModalPosition({

@@ -14,7 +14,7 @@ export default function CryptoTable() {
   const [transactionPrice, setTransactionPrice] = useState("0");
   const [transactionQuantity, setTransactionQuantity] = useState("0");
   const [transactionTotal, setTransactionTotal] = useState("0");
-  
+  const token = localStorage.getItem("token"); 
 
   const toggleModal = (coin = null) => {
     setIsOpen(!isOpen);
@@ -23,7 +23,7 @@ export default function CryptoTable() {
     console.log(coin);
 
     const now = new Date();
-    const formattedDateTime = now.toISOString().slice(0, 16); // Formatta per datetime-local
+    const formattedDateTime = now.toISOString().slice(0, 16);
     setTransactionDate(formattedDateTime);
   };
 
@@ -36,14 +36,14 @@ export default function CryptoTable() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token"); // Recupera il token dal localStorage
+    const token = localStorage.getItem("token");
     if(token){
 
       fetch("http://127.0.0.1:8000/api/favorites", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Passa il token di autenticazione
+          Authorization: `Bearer ${token}`, 
         },
       })
       .then((response) => response.json())
@@ -212,13 +212,13 @@ export default function CryptoTable() {
       <table className="crypto-table border table-fixed rounded-xl">
         <thead>
           <tr className="row-table-head table-border-bottom">
-            <th className="w-10"></th>
+           {token && <th className="w-10"></th>}
             <th className="w-25">Rank</th>
             <th>Cryptocurrency</th>
             <th>Price</th>
             <th>Market Cap</th>
             <th>24H Change</th>
-            <th className="w-10"></th>
+           {token && <th className="w-10"></th>}
           </tr>
         </thead>
         <tbody className="table-border-bottom">
@@ -231,20 +231,22 @@ export default function CryptoTable() {
               <tr
                 className="table-border-bottom text-center font-bold"
                 key={singleCoin.id}>
+                {token &&
                 <td className="ps-5">
                   <button
                     onClick={() =>
                       existInFavorite
-                        ? removeFromFavorites(singleCoin)
-                        : addToFavorites(singleCoin)
+                      ? removeFromFavorites(singleCoin)
+                      : addToFavorites(singleCoin)
                     }
                     className="pointer">
                     <FontAwesomeIcon
                       style={existInFavorite ? { color: "gold" } : ""}
                       icon={faStar}
-                    />
+                      />
                   </button>
                 </td>
+                    }
                 <td>{singleCoin.market_cap_rank}</td>
                 <td className="flex items-center crypto-name">
                   <img
@@ -262,7 +264,7 @@ export default function CryptoTable() {
                   }>
                   {formatter.format(singleCoin.price_change_24h)}
                 </td>
-
+                  {token && 
                 <td className="pe-5">
                   <button
                     className="pointer"
@@ -270,6 +272,7 @@ export default function CryptoTable() {
                     <FontAwesomeIcon icon={faPlus} />
                   </button>
                 </td>
+                    }
               </tr>
             );
           })}
