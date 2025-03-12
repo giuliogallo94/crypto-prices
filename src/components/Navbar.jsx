@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,9 +15,8 @@ export default function Navbar() {
   const [loginErrors, setLoginErrors] = useState(false)
   const { register , formState: { errors }, watch, handleSubmit } = useForm();
   const password = watch('registrationPassword', '');
-
   const loggedUser = JSON.parse(localStorage.getItem("user"));
-  console.log(loggedUser)
+  let loggedModalRef = useRef();
 
 
   const registerUser = async (formData) => {
@@ -116,7 +115,8 @@ export default function Navbar() {
         setIsAuthenticated(true);
         setIsLoginOpen(false);
 
-        window.dispatchEvent(new Event("storage"));
+        window.location.reload(); 
+
 
         setLoginErrors([]);
       } else {
@@ -180,13 +180,18 @@ export default function Navbar() {
     }); 
   };
 
- 
-  //   console.log(validateLoginForm(), loginErrors)
-  //   e.preventDefault();
-  //   if (validateLoginForm()) {
-  //     loginUser();
-  //   }
-  // };
+  const checkClickOutsideLoggedModal = (e) => {
+    if(loggedModal && loggedModalRef.current && !loggedModalRef.current.contains(e.target)) {
+  setLoggedModal(false)
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('mousedown', checkClickOutsideLoggedModal)
+
+    return () => document.removeEventListener('mousedown', checkClickOutsideLoggedModal)
+  }, [loggedModal])
+  
   
   return (
     <>
@@ -198,7 +203,7 @@ export default function Navbar() {
         </div>
        
         {!isAuthenticated ?
-          <button className="text-right" onClick={() => {setIsLoginOpen(true)}}>
+          <button id="login" onClick={() => {setIsLoginOpen(true)}}>
           Login
         </button> : 
           <button className="text-right" onClick={(e) => openLoggedModal(e)}>
@@ -206,7 +211,7 @@ export default function Navbar() {
         </button>
         }
 
-        {loggedModal && <div id="modal-portfolio-token" style={{position: "absolute", top: `${loggedModalPosition.top}px`, left: `${loggedModalPosition.left}px`}}>
+        {loggedModal && <div ref={loggedModalRef} id="modal-portfolio-token" style={{position: "absolute", top: `${loggedModalPosition.top}px`, left: `${loggedModalPosition.left}px`}}>
           <ul>
           <Link to="/settings">
           <li> 
