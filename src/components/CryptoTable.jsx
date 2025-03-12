@@ -182,6 +182,8 @@ export default function CryptoTable() {
   };
 
   const removeFromFavorites = async (crypto) => {
+    const token = localStorage.getItem("token"); // Recupera il token dal localStorage
+
     try {
       const response = await fetch(
         `http://127.0.0.1:8000/api/favorites/${crypto.name}`,
@@ -189,6 +191,8 @@ export default function CryptoTable() {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            'Authorization': `Bearer ${token}`,
+
           },
         }
       );
