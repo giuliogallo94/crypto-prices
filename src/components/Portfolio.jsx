@@ -77,40 +77,39 @@ export default function Favorites() {
 
       console.log("📌 Portafoglio ricevuto:", portfolioData);
 
-      // 🔄 Recupera i dati di mercato da CoinGecko
       const updatedPortfolio = await Promise.all(
-        portfolioData.map(async (token) => {
+        portfolioData.map(async (crypto) => {
           try {
             const response = await fetch(
-              `https://api.coingecko.com/api/v3/coins/${token.api_id}`
+              `https://api.coingecko.com/api/v3/coins/${crypto.api_id}`
             );
             const marketData = await response.json();
 
             if (!marketData.market_data) {
               console.warn(
-                `⚠️ Dati di mercato non disponibili per ${token.name}`
+                `⚠️ Dati di mercato non disponibili per ${crypto.name}`
               );
-              return token; // Ritorna il token originale se i dati sono assenti
+              return crypto; 
             }
 
             const newPrice =
-              marketData.market_data.current_price?.usd || token.price;
+              marketData.market_data.current_price?.usd || crypto.price;
             const newMarketCap =
-              marketData.market_data.market_cap?.usd || token.market_cap;
+              marketData.market_data.market_cap?.usd || crypto.market_cap;
             const marketCapRank =
-              marketData.market_data.market_cap_rank || token.market_cap_rank;
+              marketData.market_data.market_cap_rank || crypto.market_cap_rank;
             const oldPrice =
-              previousPricesRef.current[token.api_id] || token.price;
+              previousPricesRef.current[crypto.api_id] || crypto.price;
             const priceChangeDay = marketData.market_data.price_change_24h;
             const actualPrice = marketData.market_data.current_price.usd;
             const yesterdayPrice = actualPrice - priceChangeDay;
 
             console.log(
-              `📊 ${token.name} - Vecchio prezzo: ${oldPrice}, Nuovo prezzo: ${newPrice}`
+              `📊 ${crypto.name} - Vecchio prezzo: ${oldPrice}, Nuovo prezzo: ${newPrice}`
             );
 
             return {
-              ...token,
+              ...crypto,
               price: newPrice,
               market_cap: newMarketCap,
               market_cap_rank: marketCapRank,
@@ -118,10 +117,10 @@ export default function Favorites() {
             };
           } catch (error) {
             console.error(
-              `❌ Errore nel recupero dati di mercato per ${token.name}:`,
+              `❌ Errore nel recupero dati di mercato per ${crypto.name}:`,
               error
             );
-            return token; // In caso di errore, ritorna il token senza aggiornamenti
+            return crypto; // In caso di errore, ritorna il crypto senza aggiornamenti
           }
         })
       );
@@ -129,8 +128,8 @@ export default function Favorites() {
       setPortfolio(updatedPortfolio);
 
       // 🔥 Aggiorna i prezzi precedenti
-      updatedPortfolio.forEach((token) => {
-        previousPricesRef.current[token.api_id] = token.price;
+      updatedPortfolio.forEach((crypto) => {
+        previousPricesRef.current[crypto.api_id] = crypto.price;
       });
     } catch (error) {
       console.error("❌ Errore durante il recupero del portafoglio:", error);
@@ -168,8 +167,6 @@ export default function Favorites() {
   };
 
   const updatePortfolio = async (crypto, formData) => {
-    console.log(crypto, formData);
-
     const token = localStorage.getItem("token");
 
     try {

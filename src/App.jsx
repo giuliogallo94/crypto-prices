@@ -6,6 +6,7 @@ import Layout from "./components/Layout";
 import Favorites from "./components/Favorites";
 import News from "./components/News";
 import Settings from "./components/Settings";
+import SingleCoinView from "./components/SingleCoinView";
 
 const router = createBrowserRouter([
   {
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
       { path: "/favorites", element: <Favorites /> },
       { path: "/news", element: <News /> },
       { path: "/settings", element: <Settings /> },
+      { path: "/crypto/:coinId", element: <SingleCoinView />}
     ],
   },
 ]);

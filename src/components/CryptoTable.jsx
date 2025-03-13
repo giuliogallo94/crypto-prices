@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import PagesChange from "./PagesChange";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,12 +16,18 @@ export default function CryptoTable() {
   const transactionQuantity = watch("transactionQuantity", 0); 
   const transactionPrice = watch("transactionPrice", 0);
   const transactionType = watch("transactionType", "1");
+  const token = localStorage.getItem("token");
+
+  const formatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 5,
+  });
 
   useEffect(() => {
     setValue("transactionTotal", transactionQuantity * transactionPrice);
   }, [transactionQuantity, transactionPrice, setValue]);
-
-  const token = localStorage.getItem("token");
 
   const toggleModal = (coin = null) => {
     setIsOpen(!isOpen);
@@ -81,17 +88,9 @@ export default function CryptoTable() {
     return () => clearInterval(interval);
   }, [pageNumber]);
 
-  const formatter = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 5,
-  });
-
   const updatePortfolio = async (crypto, formData) => {
     const token = localStorage.getItem("token");
 
-    
     try {
       const response = await fetch(
         `http://127.0.0.1:8000/api/portfolios/${crypto.id}`,
@@ -255,7 +254,9 @@ export default function CryptoTable() {
                     className="crypto-logo mr-5"
                     alt=""
                   />
-                  <h3>{singleCoin.name}</h3>
+                  <Link to={`/crypto/${singleCoin.id}`} state={{ crypto: singleCoin }}>
+                    <h3>{singleCoin.name}</h3>
+                  </Link>
                 </td>
                 <td>{formatter.format(singleCoin.current_price)}</td>
                 <td>{formatter.format(singleCoin.market_cap)}</td>

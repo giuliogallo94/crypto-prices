@@ -252,3 +252,36 @@ thead {
   text-decoration: underline;
   color: gold;
 }
+
+/* END ARTICLE */
+
+
+/* SINGLE CRYPTO */
+.single-crypto-header {
+  color: gold;
+  font-weight: bold;
+  font-size: large;
+}
+
+#single-crypto-image {
+  width: 5vw;
+}
+
+.single-crypto-stats {
+  border: 2px solid rgb(40, 86, 157);
+  border-radius: 5px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.single-crypto-stats h4 {
+  font-weight: bold;
+}
+
+.single-crypto-stats span {
+color: gold;
+}
+
